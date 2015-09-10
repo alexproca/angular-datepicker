@@ -7,7 +7,8 @@ Module.directive('dateRange', function () {
     templateUrl: 'templates/daterange.html',
     scope: {
       start: '=',
-      end: '='
+      end: '=',
+      callback: '='
     },
     link: function (scope, element, attrs) {
 
@@ -16,6 +17,11 @@ Module.directive('dateRange', function () {
        */
       scope.start = new Date(scope.start || new Date());
       scope.end = new Date(scope.end || new Date());
+      
+      isFunction = function(functionToCheck) {
+        var getType = {};
+        return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+      }
 
       attrs.$observe('disabled', function(isDisabled){
           scope.disableDatePickers = !!isDisabled;
@@ -23,11 +29,17 @@ Module.directive('dateRange', function () {
       scope.$watch('start.getTime()', function (value) {
         if (value && scope.end && value > scope.end.getTime()) {
           scope.end = new Date(value);
+          if(isFunction(callback)) {
+            callback.call();
+          }
         }
       });
       scope.$watch('end.getTime()', function (value) {
         if (value && scope.start && value < scope.start.getTime()) {
           scope.start = new Date(value);
+          if(isFunction(callback)) {
+            callback.call();
+          }
         }
       });
     }
